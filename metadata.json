@@ -1,0 +1,6 @@
+{
+  "name": "SitePilot AI",
+  "description": "AI-powered website intelligence and business growth SaaS platform for performance audits, SEO insights, client CRM, and automated monitoring.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

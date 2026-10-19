@@ -1,0 +1,231 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Registered user profile and workspace affiliation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email", "description": "User email address" },
+        "displayName": { "type": "string", "maxLength": 100, "description": "Full name or display handle" },
+        "photoURL": { "type": "string", "maxLength": 500, "description": "Avatar photo URL" },
+        "activeWorkspaceId": { "type": "string", "maxLength": 128, "description": "Currently selected workspace ID" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of user creation" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
+      },
+      "required": ["id", "email", "createdAt"]
+    },
+    "Workspace": {
+      "title": "Workspace",
+      "description": "Multi-tenant workspace container for sites, audits, CRM, and team members",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "description": "Workspace identifier" },
+        "name": { "type": "string", "maxLength": 100, "description": "Organization or agency name" },
+        "ownerId": { "type": "string", "maxLength": 128, "description": "Auth UID of the workspace owner" },
+        "plan": { "type": "string", "enum": ["free", "pro", "agency", "enterprise"], "description": "Active subscription tier" },
+        "currency": { "type": "string", "enum": ["USD", "NGN", "EUR", "GBP"], "description": "Primary display currency code" },
+        "monthlyAuditsUsed": { "type": "number", "description": "Count of audits run in current monthly cycle" },
+        "monthlyAuditsLimit": { "type": "number", "description": "Monthly allowed audit quota" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of workspace creation" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last workspace modification" }
+      },
+      "required": ["id", "name", "ownerId", "plan", "createdAt"]
+    },
+    "WorkspaceMember": {
+      "title": "WorkspaceMember",
+      "description": "Membership link and role within a workspace",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "description": "Compound member ID" },
+        "workspaceId": { "type": "string", "maxLength": 128, "description": "Associated workspace ID" },
+        "userId": { "type": "string", "maxLength": 128, "description": "Associated user UID" },
+        "email": { "type": "string", "format": "email", "description": "Member email" },
+        "role": { "type": "string", "enum": ["owner", "admin", "analyst", "member", "viewer"], "description": "Role in workspace" },
+        "joinedAt": { "type": "string", "description": "ISO timestamp when membership was established" }
+      },
+      "required": ["id", "workspaceId", "userId", "email", "role", "joinedAt"]
+    },
+    "Website": {
+      "title": "Website",
+      "description": "A client or owned website project managed in SitePilot AI",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "description": "Unique website ID" },
+        "workspaceId": { "type": "string", "maxLength": 128, "description": "Workspace ID owning this project" },
+        "url": { "type": "string", "maxLength": 2048, "description": "Normalized target URL" },
+        "name": { "type": "string", "maxLength": 100, "description": "Project display name" },
+        "category": { "type": "string", "maxLength": 50, "description": "Industry or website category" },
+        "monitoringFrequency": { "type": "string", "enum": ["manual", "daily", "weekly", "monthly"], "description": "Automated schedule" },
+        "monitoringEnabled": { "type": "boolean", "description": "Whether automated monitoring is active" },
+        "lastAuditScore": { "type": "number", "description": "Latest overall health score (0-100)" },
+        "lastAuditAt": { "type": "string", "description": "ISO timestamp of last completed audit" },
+        "clientId": { "type": "string", "maxLength": 128, "description": "Associated CRM client ID" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of creation" },
+        "createdBy": { "type": "string", "maxLength": 128, "description": "UID of creator" }
+      },
+      "required": ["id", "workspaceId", "url", "name", "createdAt", "createdBy"]
+    },
+    "Audit": {
+      "title": "Audit",
+      "description": "Complete website technical, performance, accessibility, and SEO audit record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "description": "Unique audit ID" },
+        "workspaceId": { "type": "string", "maxLength": 128, "description": "Associated workspace ID" },
+        "websiteId": { "type": "string", "maxLength": 128, "description": "Website project ID or 'adhoc'" },
+        "url": { "type": "string", "maxLength": 2048, "description": "Analyzed URL" },
+        "strategy": { "type": "string", "enum": ["mobile", "desktop"], "description": "Device simulation mode" },
+        "status": { "type": "string", "enum": ["pending", "running", "completed", "failed"], "description": "Execution status" },
+        "scores": { "type": "object", "description": "Calculated Lighthouse scores (0-100)" },
+        "metrics": { "type": "object", "description": "Core Web Vitals & performance metrics (FCP, LCP, CLS, TBT, Speed Index)" },
+        "opportunities": { "type": "array", "description": "Identified Lighthouse opportunities" },
+        "diagnostics": { "type": "array", "description": "Diagnostic findings and technical audits" },
+        "aiSummary": { "type": "string", "maxLength": 5000, "description": "Gemini-generated executive explanation" },
+        "aiActionPlan": { "type": "object", "description": "Gemini-prioritised action plan" },
+        "rawProvider": { "type": "string", "maxLength": 50, "description": "Data provider e.g. 'pagespeed-insights'" },
+        "errorMessage": { "type": "string", "maxLength": 1000, "description": "Error reason if audit failed" },
+        "createdAt": { "type": "string", "description": "Audit start timestamp" },
+        "completedAt": { "type": "string", "description": "Audit finish timestamp" },
+        "createdBy": { "type": "string", "maxLength": 128, "description": "UID of initiating user" }
+      },
+      "required": ["id", "workspaceId", "url", "strategy", "status", "createdAt", "createdBy"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "Agency client or prospect CRM record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "description": "Client ID" },
+        "workspaceId": { "type": "string", "maxLength": 128, "description": "Workspace ID" },
+        "name": { "type": "string", "maxLength": 100, "description": "Contact person name" },
+        "company": { "type": "string", "maxLength": 100, "description": "Client business / agency name" },
+        "email": { "type": "string", "format": "email", "description": "Primary contact email" },
+        "phone": { "type": "string", "maxLength": 30, "description": "Phone number" },
+        "websiteUrl": { "type": "string", "maxLength": 2048, "description": "Client website URL" },
+        "status": { "type": "string", "enum": ["prospect", "researching", "contacted", "replied", "meeting_scheduled", "proposal_sent", "won", "lost"], "description": "Pipeline stage" },
+        "estimatedValue": { "type": "number", "description": "Estimated project or retainer deal value" },
+        "currency": { "type": "string", "maxLength": 10, "description": "Currency code" },
+        "notes": { "type": "string", "maxLength": 2000, "description": "Private CRM notes" },
+        "lastContactDate": { "type": "string", "description": "ISO timestamp of last communication" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "createdBy": { "type": "string", "maxLength": 128, "description": "Creator user UID" }
+      },
+      "required": ["id", "workspaceId", "name", "company", "status", "createdAt", "createdBy"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Follow-up, website remediation task or client action item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "description": "Task identifier" },
+        "workspaceId": { "type": "string", "maxLength": 128, "description": "Workspace ID" },
+        "title": { "type": "string", "maxLength": 200, "description": "Task summary title" },
+        "description": { "type": "string", "maxLength": 2000, "description": "Detailed remediation instructions" },
+        "priority": { "type": "string", "enum": ["low", "medium", "high"], "description": "Priority level" },
+        "status": { "type": "string", "enum": ["todo", "in_progress", "done"], "description": "Task status" },
+        "dueDate": { "type": "string", "description": "Target completion date" },
+        "assignedTo": { "type": "string", "maxLength": 128, "description": "UID or email of assignee" },
+        "websiteId": { "type": "string", "maxLength": 128, "description": "Associated website project" },
+        "auditId": { "type": "string", "maxLength": 128, "description": "Associated audit ID" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "createdBy": { "type": "string", "maxLength": 128, "description": "Creator UID" }
+      },
+      "required": ["id", "workspaceId", "title", "priority", "status", "createdAt", "createdBy"]
+    },
+    "AutomationRule": {
+      "title": "AutomationRule",
+      "description": "Event-based automation rule for notifications, task creation, or reporting",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "description": "Rule ID" },
+        "workspaceId": { "type": "string", "maxLength": 128, "description": "Workspace ID" },
+        "name": { "type": "string", "maxLength": 100, "description": "Friendly rule name" },
+        "triggerType": { "type": "string", "enum": ["audit_completed", "score_dropped", "critical_issue_found", "task_overdue"], "description": "Trigger event type" },
+        "conditionThreshold": { "type": "number", "description": "Optional numeric threshold e.g. score below 70" },
+        "actionType": { "type": "string", "enum": ["create_task", "notify_inapp", "generate_action_plan"], "description": "Action executed" },
+        "isEnabled": { "type": "boolean", "description": "Whether rule is active" },
+        "lastRunAt": { "type": "string", "description": "Last execution timestamp" },
+        "runCount": { "type": "number", "description": "Number of times fired" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "createdBy": { "type": "string", "maxLength": 128, "description": "Creator UID" }
+      },
+      "required": ["id", "workspaceId", "name", "triggerType", "actionType", "isEnabled", "createdAt", "createdBy"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "In-app alert or notification for workspace members",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "description": "Notification ID" },
+        "workspaceId": { "type": "string", "maxLength": 128, "description": "Workspace ID" },
+        "userId": { "type": "string", "maxLength": 128, "description": "Target recipient UID" },
+        "title": { "type": "string", "maxLength": 150, "description": "Short heading" },
+        "message": { "type": "string", "maxLength": 500, "description": "Body message text" },
+        "type": { "type": "string", "enum": ["info", "warning", "success", "alert"], "description": "Notification semantic style" },
+        "read": { "type": "boolean", "description": "Whether viewed" },
+        "link": { "type": "string", "maxLength": 500, "description": "Optional navigation link in app" },
+        "createdAt": { "type": "string", "description": "Timestamp" }
+      },
+      "required": ["id", "workspaceId", "userId", "title", "message", "type", "read", "createdAt"]
+    },
+    "SharedReport": {
+      "title": "SharedReport",
+      "description": "Public unguessable share link token for client-ready website audit",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "description": "Public share token" },
+        "workspaceId": { "type": "string", "maxLength": 128, "description": "Workspace ID" },
+        "auditId": { "type": "string", "maxLength": 128, "description": "Underlying audit ID" },
+        "url": { "type": "string", "maxLength": 2048, "description": "Audited website URL" },
+        "expiresAt": { "type": "string", "description": "Expiration date ISO timestamp" },
+        "isRevoked": { "type": "boolean", "description": "Whether link has been deactivated" },
+        "viewsCount": { "type": "number", "description": "Times viewed by client" },
+        "createdAt": { "type": "string", "description": "Share creation timestamp" }
+      },
+      "required": ["id", "workspaceId", "auditId", "url", "expiresAt", "isRevoked", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents keyed by Auth UID"
+    },
+    "/workspaces/{workspaceId}": {
+      "schema": "Workspace",
+      "description": "Multi-tenant workspaces containing agency configuration"
+    },
+    "/workspaces/{workspaceId}/members/{memberId}": {
+      "schema": "WorkspaceMember",
+      "description": "Members and roles within a workspace"
+    },
+    "/workspaces/{workspaceId}/websites/{websiteId}": {
+      "schema": "Website",
+      "description": "Website projects managed within a workspace"
+    },
+    "/workspaces/{workspaceId}/audits/{auditId}": {
+      "schema": "Audit",
+      "description": "Audit runs and detailed Lighthouse metrics"
+    },
+    "/workspaces/{workspaceId}/clients/{clientId}": {
+      "schema": "Client",
+      "description": "CRM client and prospect database for freelancers/agencies"
+    },
+    "/workspaces/{workspaceId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Remediation tasks and client follow-ups"
+    },
+    "/workspaces/{workspaceId}/automations/{automationId}": {
+      "schema": "AutomationRule",
+      "description": "Event-based automation triggers and actions"
+    },
+    "/workspaces/{workspaceId}/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "In-app alerts and notifications for workspace users"
+    },
+    "/sharedReports/{token}": {
+      "schema": "SharedReport",
+      "description": "Unguessable public read-only audit share links"
+    }
+  }
+}
